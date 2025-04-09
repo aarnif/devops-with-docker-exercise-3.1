@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish_pipeline:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -38,3 +38,15 @@ jobs:
           context: .
           push: true
           tags: aarnif/express-app
+
+  deploy:
+    needs: [publish_pipeline]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "21"
+      - name: Trigger service deployment
+        if: ${{ github.event_name == 'push' }}
+        run: curl ${{ secrets.RENDER_SERVICE_URL }}
